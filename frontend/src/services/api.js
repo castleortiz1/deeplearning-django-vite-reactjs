@@ -1,26 +1,25 @@
-// src/services/api.js
+// api.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';  // URL de la API de Django
+const API_URL = 'http://localhost:8000/api';
 
-// Obtener datos históricos de una acción
-export const getStockData = async (ticker) => {
-  try {
-    const response = await axios.get(`${API_URL}/stock-data/${ticker}/`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching stock data:', error);
-    throw error;
-  }
-};
+const apiClient = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+    withCredentials: true
+});
 
-// Obtener la predicción del modelo (si es necesario)
-export const getPrediction = async (ticker) => {
-  try {
-    const response = await axios.get(`${API_URL}/predict/${ticker}/`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching prediction:', error);
-    throw error;
-  }
+// Modificar la función getPopularStocks
+export const getPopularStocks = async () => {
+    try {
+        const response = await apiClient.get('/popular-stocks/');
+        console.log('Response:', response);  // Para debugging
+        return response.data;
+    } catch (error) {
+        console.error('Error detallado:', error.response || error);  // Mejor logging
+        return [];
+    }
 };

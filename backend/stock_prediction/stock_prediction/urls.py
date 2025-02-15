@@ -21,5 +21,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # Incluye las rutas de la API
+    path('api/', include('api.urls')),  # Cambia esto de 'stock_prediction.api.urls' a 'api.urls'
 ]

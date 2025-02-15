@@ -1,8 +1,8 @@
 # api/serializers.py
 from rest_framework import serializers
-from .models import StockData
+from .models import Stock  # Corregir la importación
 
-class StockDataSerializer(serializers.ModelSerializer):
+class StockSerializer(serializers.ModelSerializer):  # Cambia el nombre para coincidir con el modelo
     class Meta:
-        model = StockData
+        model = Stock
         fields = '__all__'  # Incluye todos los campos del modelo

@@ -1,24 +1,25 @@
-// src/App.jsx
-// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './ThemeContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
+import ThemeToggle from './components/ThemeToggle';
 
 const App = () => {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
+    <ThemeProvider>
+      <Router>
         <Navbar />
-        <div className="container mx-auto p-4">
+        <div className="min-h-screen p-4">
+          <ThemeToggle />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 };
 
