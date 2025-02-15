@@ -1,3 +1,4 @@
+// src/components/StockSearch.jsx
 import React, { useState, useEffect } from 'react';
 import { getPopularStocks, searchStocks } from '../services/api';
 

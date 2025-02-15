@@ -1,3 +1,4 @@
+// src/components/PredictionForm.jsx
 import React, { useState } from 'react';
 import { getStockData } from '../services/api';
 import StockSearch from './StockSearch';
