@@ -68,14 +68,14 @@ def stock_data(request):
     try:
         stock = Stock.objects.get(ticker=ticker)  # Verifica si el ticker existe en la base de datos
     except Stock.DoesNotExist:
-        return Response({"error": "No se encontró la acción con el ticker proporcionado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": f"No se encontró la acción con el ticker {ticker}"}, status=status.HTTP_404_NOT_FOUND)
 
     try:
         stock_api = yf.Ticker(ticker)
         history = stock_api.history(period="1y")
 
         if history.empty:
-            return Response({"error": "No se encontraron datos en Yahoo Finance"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"No se encontraron datos en Yahoo Finance para {ticker}"}, status=status.HTTP_404_NOT_FOUND)
 
         response_data = {
             "ticker": ticker,
@@ -88,4 +88,4 @@ def stock_data(request):
 
     except Exception as e:
         print(f"Error al obtener datos: {e}")
-        return Response({"error": "Error al obtener datos de la acción"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": f"Error al obtener datos de la acción {ticker}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
