@@ -1,4 +1,4 @@
-# api/apps.py
+# backend/stock_prediction/api/apps.py
 from django.apps import AppConfig
 
 

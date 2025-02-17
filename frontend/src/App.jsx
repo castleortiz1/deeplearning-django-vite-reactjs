@@ -5,18 +5,26 @@ import { ThemeProvider } from './ThemeContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
-import ThemeToggle from './components/ThemeToggle';
+import Login from './components/Login';
+import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
   return (
     <ThemeProvider>
       <Router>
         <Navbar />
-        <div className="min-h-screen p-4">
-          <ThemeToggle />
+        <div className="container mx-auto p-4">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
             <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </div>
       </Router>

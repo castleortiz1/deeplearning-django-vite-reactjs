@@ -12,10 +12,9 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import zoomPlugin from 'chartjs-plugin-zoom'; // 🔥 Importa el plugin de zoom
+import zoomPlugin from 'chartjs-plugin-zoom';
 import { calculateSMA, calculateEMA, calculateRSI, calculateMACD } from '../utils/indicators';
 
-// 🔥 Registra el plugin de zoom junto con los demás módulos
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,22 +24,21 @@ ChartJS.register(
   Tooltip,
   Legend,
   Filler,
-  zoomPlugin // 👈 Aquí se registra el plugin correctamente
+  zoomPlugin
 );
 
 const StockChart = ({ data }) => {
-  if (!data || !data.prices || data.prices.length === 0) {
-    return <p>No hay datos disponibles</p>;
+  if (!data || !data.prices || !Array.isArray(data.prices) || data.prices.length === 0) {
+    return <p>No hay datos disponibles para mostrar el gráfico</p>;
   }
 
-  const labels = data.labels;
+  const labels = data.dates || Array.from({ length: data.prices.length }, (_, i) => `Día ${i + 1}`);
   const prices = data.prices;
 
-  // Cálculo de indicadores
-  const sma = calculateSMA(prices, 10);
-  const ema = calculateEMA(prices, 10);
-  const rsi = calculateRSI(prices, 14);
-  const { macd, signal } = calculateMACD(prices, 12, 26, 9);
+  const sma = prices.length >= 10 ? calculateSMA(prices, 10) : [];
+  const ema = prices.length >= 10 ? calculateEMA(prices, 10) : [];
+  const rsi = prices.length >= 14 ? calculateRSI(prices, 14) : [];
+  const { macd, signal } = prices.length >= 26 ? calculateMACD(prices) : { macd: [], signal: [] };
 
   const chartData = {
     labels,
@@ -48,9 +46,12 @@ const StockChart = ({ data }) => {
       {
         label: 'Precio de Cierre',
         data: prices,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        fill: false,
-        tension: 0.3,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+        fill: true,
+        tension: 0.1,
+        pointRadius: 2,
+        borderWidth: 2,
       },
       {
         label: 'SMA (10 días)',
@@ -58,6 +59,8 @@ const StockChart = ({ data }) => {
         borderColor: 'rgba(255, 99, 132, 1)',
         borderDash: [5, 5],
         fill: false,
+        tension: 0.1,
+        pointRadius: 0,
       },
       {
         label: 'EMA (10 días)',
@@ -65,35 +68,60 @@ const StockChart = ({ data }) => {
         borderColor: 'rgba(255, 206, 86, 1)',
         borderDash: [5, 5],
         fill: false,
+        tension: 0.1,
+        pointRadius: 0,
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Historial de Precios con Indicadores Técnicos',
-      },
+      legend: { position: 'top' },
+      title: { display: true, text: 'Historial de Precios con Indicadores Técnicos' },
       zoom: {
         pan: { enabled: true, mode: 'x' },
         zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
       },
     },
+    scales: {
+      x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } },
+      y: { position: 'right', grid: { color: 'rgba(0, 0, 0, 0.1)' } },
+    },
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-2">Gráfico de la Acción</h2>
+    <div>
       <Line data={chartData} options={options} />
-      <h3 className="text-lg font-bold mt-4">RSI</h3>
-      <p>{rsi.length ? `Último RSI: ${rsi[rsi.length - 1].toFixed(2)}` : 'Calculando...'}</p>
-      <h3 className="text-lg font-bold mt-2">MACD</h3>
-      <p>{macd.length ? `Último MACD: ${macd[macd.length - 1].toFixed(2)}, Señal: ${signal[signal.length - 1].toFixed(2)}` : 'Calculando...'}</p>
+      <div className="mt-4 space-y-2">
+        <p>
+          <strong>RSI (14 días):</strong>{' '}
+          {rsi.length ? (
+            <>
+              {rsi[rsi.length - 1].toFixed(2)}{' '}
+              {rsi[rsi.length - 1] > 70
+                ? '⚠️ Sobrecomprado'
+                : rsi[rsi.length - 1] < 30
+                ? '⚠️ Sobrevendido'
+                : '✓ Neutral'}
+            </>
+          ) : (
+            'Insuficientes datos para calcular RSI'
+          )}
+        </p>
+        <p>
+          <strong>MACD:</strong>{' '}
+          {macd.length ? (
+            <>
+              {macd[macd.length - 1].toFixed(2)} Señal: {signal[signal.length - 1].toFixed(2)}{' '}
+              {macd[macd.length - 1] > signal[signal.length - 1] ? '↗️ Señal alcista' : '↘️ Señal bajista'}
+            </>
+          ) : (
+            'Insuficientes datos para calcular MACD'
+          )}
+        </p>
+      </div>
     </div>
   );
 };

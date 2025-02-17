@@ -1,1 +1,1 @@
-# stock_prediction/__init__.py
+# backend/stock_prediction/stock_prediction/__init__.py

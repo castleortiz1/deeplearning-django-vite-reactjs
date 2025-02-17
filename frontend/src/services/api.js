@@ -1,42 +1,57 @@
-// api.js
+// src/services/api.js
 import axios from 'axios';
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
 const apiClient = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    }
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
 });
+
+const getAuthToken = () => localStorage.getItem('access_token');
+
+const setAuthHeader = () => {
+  const token = getAuthToken();
+  if (token) {
+    apiClient.defaults.headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete apiClient.defaults.headers['Authorization'];
+  }
+};
 
 export const getPopularStocks = async () => {
     try {
-        const response = await apiClient.get('/popular-stocks/');
+        const response = await apiClient.get('/stocks/popular/');
         return response.data;
     } catch (error) {
-        console.error('Error en getPopularStocks:', error.response || error);
+        console.error('Error en getPopularStocks:', error.response?.data || error.message);
         return [];
     }
 };
 
-export const getStockData = async (ticker) => {
+const getPopularStocks = async () => {
     try {
-        const response = await apiClient.get(`/stock-data/?ticker=${ticker}`);
+        const response = await apiClient.get('/stocks/popular/');
         return response.data;
     } catch (error) {
-        console.error('Error en getStockData:', error.response || error);
-        return null;  // Devuelve null en caso de error
-    }
-};
-
-export const searchStocks = async (query) => {
-    try {
-        const response = await apiClient.get(`/search-stocks/?q=${query}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error en searchStocks:', error.response || error);
+        console.error('Error en getPopularStocks:', error.response?.data || error.message);
         return [];
     }
+};
+export default getPopularStocks;
+
+export const login = async (username, password) => {
+  try {
+    const response = await apiClient.post('/auth/token/', { username, password });
+    const { access } = response.data;
+    localStorage.setItem('access_token', access);
+    setAuthHeader();
+    return true;
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error.response?.data || error.message);
+    return false;
+  }
 };

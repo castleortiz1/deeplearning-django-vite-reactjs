@@ -1,11 +1,10 @@
-# api/urls.py
+# backedn/stock_prediction/api/urls.py
 from django.urls import path
-from . import views  # Esto asegura que se importen las vistas correctamente
+from .views import api_root, stock_data, popular_stocks, search_stocks
 
 urlpatterns = [
-    path('', views.api_root, name='api-root'),  # Ruta base para la API
-    path('api/stock-data/', views.stock_data, name='stock-data'),
-    path('popular-stocks/', views.popular_stocks, name='popular-stocks'),
-    path('search-stocks/', views.search_stocks, name='search-stocks'),  # Asegúrate de que esta línea esté correcta
+    path('', api_root, name='api-root'),
+    path('stocks/popular/', popular_stocks, name='popular-stocks'),
+    path('stocks/search/', search_stocks, name='search-stocks'),
+    path('stocks/data/', stock_data, name='stock-data'),  # Corrección de la ruta
 ]
-

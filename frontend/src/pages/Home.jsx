@@ -7,9 +7,13 @@ const Home = () => {
   const [stockData, setStockData] = useState({ labels: [], prices: [] });
 
   const handlePredict = (data) => {
-    const labels = data.map((item) => item.date);
-    const prices = data.map((item) => item.close_price);
-    setStockData({ labels, prices });
+    if (data && data.prices && data.dates) {
+      const labels = data.dates;  // Usa las fechas devueltas por el backend
+      const prices = data.prices;
+      setStockData({ labels, prices });
+    } else {
+      console.error('Datos no válidos para predicción');
+    }
   };
 
   return (

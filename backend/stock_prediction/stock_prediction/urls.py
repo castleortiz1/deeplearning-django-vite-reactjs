@@ -15,11 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-# stock_prediction/urls.py
+# backend/stock_prediction/stock_prediction/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from authentication.views import CustomTokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import my_protected_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # Cambia esto de 'stock_prediction.api.urls' a 'api.urls'
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/', include('api.urls')),  # Incluye las URLs de tu API
+    path('api/auth/', include('authentication.urls')),  # Incluye las URLs de autenticación
+    path('api/auth/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/protected/', my_protected_view, name='protected_view'),
 ]

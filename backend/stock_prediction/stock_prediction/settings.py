@@ -9,9 +9,15 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-# stock_prediction/settings.py
+# backend/stock_prediction/stock_prediction/settings.py
 from pathlib import Path
+import os
+# Configuración de JWT
+from datetime import timedelta
+from django.core.asgi import get_asgi_application
+from dotenv import load_dotenv  # 📌 Agrega esta línea
 
+load_dotenv()  # 📌 Carga variables de .env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,11 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)rm10-i^47njnlp-r)^2d-pv=93rxo+s-+yw4ggpq_37x5louq'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # 📌 Usa la variable de entorno
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
 
@@ -41,22 +44,24 @@ INSTALLED_APPS = [
     # 'stock_prediction',  # Agrega esto si falta
     # 'stock_prediction.api',  # Agrega esto si aún tienes problemas
     # 'stock_prediction.api',  # Asegúrate de que tu app esté aquí
-    'corsheaders',
+    'corsheaders',  # Para CORS
     'rest_framework',  # Para la API
+    'rest_framework_simplejwt',  # Para JWT
     'api',  # Tu aplicación de API
+    'authentication',  # Tu aplicación de autenticación
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Solo una vez aquí
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'stock_prediction.urls'
 
@@ -76,8 +81,39 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'stock_prediction.wsgi.application'
+# Configuración de DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
 
+# Configuración de JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+
+WSGI_APPLICATION = 'stock_prediction.wsgi.application'
+ASGI_APPLICATION = 'stock_prediction.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -85,11 +121,11 @@ WSGI_APPLICATION = 'stock_prediction.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'stockdb',  # Nombre de la base de datos
-        'USER': 'postgres',  # Usuario de PostgreSQL
-        'PASSWORD': 'Caminacaminoconcamila@',  # Contraseña de PostgreSQL
-        'HOST': 'localhost',  # Host de la base de datos
-        'PORT': '5432',  # Puerto de PostgreSQL
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     }
 }
 
@@ -118,7 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC-06:00'
+TIME_ZONE = 'America/Mexico_City'  # O ajusta a tu país
 
 USE_I18N = True
 
@@ -135,7 +171,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True  # Permite todas las solicitudes CORS (solo para desarrollo)
+AUTH_USER_MODEL = 'authentication.CustomUser'  # Configura el modelo de usuario personalizado
+
+CORS_ALLOW_ALL_ORIGINS = False  # Permite todas las solicitudes CORS (solo para desarrollo)
 CORS_ALLOW_CREDENTIALS = True
 
 # Configuración de CORS
@@ -165,3 +203,5 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+application = get_asgi_application()
